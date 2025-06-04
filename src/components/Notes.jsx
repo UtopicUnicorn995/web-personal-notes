@@ -1,11 +1,33 @@
+import { Fragment } from "react";
 const Notes = ({ item, onClick }) => {
   const addNewLineToText = (text) => {
-    return text?.split("\n").map((line, index) => (
-      <span key={index}>
-        {line}
-        <br />
-      </span>
-    ));
+    const urlRegex =
+      /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+
+    return text?.split("\n").map((line, index) => {
+      const parts = line.split(urlRegex);
+
+      return (
+        <span key={index}>
+          {parts.map((part, i) =>
+            urlRegex.test(part) ? (
+              <a
+                href={part}
+                target="_blank"
+                key={i}
+                className="break-all text-blue-600 font-bold underline"
+                onClick={e => e.stopPropagation()}
+              >
+                {part}
+              </a>
+            ) : (
+              <Fragment key={i}>{part}</Fragment>
+            )
+          )}
+          <br />
+        </span>
+      );
+    });
   };
 
   return (
