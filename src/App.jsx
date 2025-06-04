@@ -13,6 +13,7 @@ import {
   addDoc,
 } from "firebase/firestore";
 import Notes from "./components/Notes";
+import Toast from "./components/Toast";
 
 const modalRoot = document.getElementById("modal-root");
 
@@ -20,6 +21,21 @@ function App() {
   const [items, setItems] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
   const [selectedUser, setSelectedUser] = useState("Notes");
+  const [showModal, setShowModal] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [toast, setToast] = useState({
+    show: false,
+    title: "",
+    description: "",
+  });
+
+  useEffect(() => {
+    if (selectedNote) {
+      setShowModal(true);
+    } else {
+      setShowModal(false);
+    }
+  }, [selectedNote]);
 
   useEffect(() => {
     const q = query(collection(db, selectedUser));
@@ -53,8 +69,27 @@ function App() {
       const newNoteRef = collection(db, selectedUser);
       const newNote = await addDoc(newNoteRef, payload);
       setSelectedNote((prev) => ({ ...prev, id: newNote.id }));
+      console.log("neww", newNote);
+      setToast({
+        show: true,
+        title: "success",
+        description: `You have sucessfully added ${selectedNote.title}`,
+      });
     } catch (error) {
       console.error("Error creating a new note", error);
+      setToast({
+        show: true,
+        title: "failed",
+        description: `You have failed creating a note.`,
+      });
+    } finally {
+      setTimeout(() => {
+        setToast({
+          show: false,
+          title: "",
+          description: ``,
+        });
+      }, 3000);
     }
   };
 
@@ -67,8 +102,26 @@ function App() {
     try {
       const noteRef = doc(db, selectedUser, selectedNote.id);
       await updateDoc(noteRef, payload);
+      setToast({
+        show: true,
+        title: "success",
+        description: `You have sucessfully updated ${selectedNote.title}`,
+      });
     } catch (error) {
       console.error("error updating notes.", error);
+      setToast({
+        show: true,
+        title: "failed",
+        description: `You have failed updating a note.`,
+      });
+    } finally {
+      setTimeout(() => {
+        setToast({
+          show: false,
+          title: "",
+          description: ``,
+        });
+      }, 3000);
     }
   };
 
@@ -80,8 +133,26 @@ function App() {
         const noteRef = doc(db, selectedUser, itemId);
         await deleteDoc(noteRef);
         setSelectedNote(null);
+        setToast({
+          show: true,
+          title: "success",
+          description: `You have sucessfully deleted ${selectedNote.title}`,
+        });
       } catch (error) {
-        console.error("Error deleting notes", error);
+        console.error("error deleting notes.", error);
+        setToast({
+          show: true,
+          title: "failed",
+          description: `You have failed deleting a note.`,
+        });
+      } finally {
+        setTimeout(() => {
+          setToast({
+            show: false,
+            title: "",
+            description: ``,
+          });
+        }, 3000);
       }
     }
   };
@@ -89,6 +160,9 @@ function App() {
   return (
     <>
       <main className="@container min-h-screen bg-[#F8EEE2]">
+        {toast.show && (
+          <Toast title={toast.title} description={toast.description} />
+        )}
         <div className="mx-auto w-full max-w-6xl p-3 sm:p-6">
           <h1
             onClick={() =>
@@ -142,7 +216,11 @@ function App() {
               <div className="flex min-h-full w-full items-center justify-center p-4 text-text sm:items-center sm:p-0">
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full max-w-lg"
+                  className={`relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all duration-300 sm:my-8 w-full max-w-lg
+                    ${
+                      showModal ? "opacity-100 scale-100" : "opacity-0 scale-95"
+                    }
+                  `}
                 >
                   <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div className="sm:flex sm:items-start w-full">
@@ -154,7 +232,7 @@ function App() {
                           >
                             Edit note
                           </h3>
-                          <div onClick={() => deleteNote(selectedNote.id)}>
+                          <div onClick={() => setConfirmDelete(true)}>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
@@ -221,7 +299,7 @@ function App() {
                     <button
                       onClick={selectedNote.id ? updateNote : createNote}
                       type="button"
-                      className="inline-flex hover:cursor-pointer w-full justify-center rounded-md border border-gray-300 bg-[#F8EEE2] px-3 py-2 text-sm font-semibold text-[#262626] shadow-xs hover:bg-[#ede2d5] sm:ml-3 sm:w-auto"
+                      className="inline-flex transition delay-150 duration-300 ease-in-out hover:cursor-pointer w-full justify-center rounded-md border border-gray-300 bg-[#F8EEE2] px-3 py-2 text-sm font-semibold text-[#262626] shadow-xs hover:bg-[#ede2d5] sm:ml-3 sm:w-auto"
                     >
                       Save
                     </button>
@@ -233,6 +311,46 @@ function App() {
                       Cancel
                     </button>
                   </div>
+                  {confirmDelete && (
+                    <div
+                      onClick={() => setConfirmDelete(false)}
+                      className={`fixed inset-0 z-20 flex items-center justify-center bg-black/30 transform transition duration-300 ease-in-out ${
+                        confirmDelete
+                          ? "opacity-100 scale-100 pointer-events-auto"
+                          : "opacity-0 scale-95 pointer-events-none"
+                      }`}
+                    >
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl"
+                      >
+                        <h2 className="mb-2 text-lg font-semibold text-gray-800">
+                          Delete this note?
+                        </h2>
+                        <p className="mb-6 text-sm text-gray-600">
+                          This action can’t be undone.
+                        </p>
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setConfirmDelete(false)}
+                            className="rounded-md bg-gray-100 px-3 py-2 text-sm hover:bg-gray-200"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              deleteNote(selectedNote.id);
+                              setConfirmDelete(false);
+                            }}
+                            className="rounded-md bg-red-500 px-3 py-2 text-sm text-white hover:bg-red-600"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

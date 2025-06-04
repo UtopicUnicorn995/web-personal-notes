@@ -35,7 +35,7 @@ const Notes = ({ item, onClick }) => {
       <div
         onClick={onClick}
         key={item.id}
-        className="flex gap-x-4 rounded-xl bg-white hover:cursor-pointer hover:bg-gray-200 p-3 sm:p-4 md:w-3xs max-h-[260px]"
+        className="flex gap-x-4 rounded-xl bg-white transition delay-150 duration-200 ease-in-out hover:cursor-pointer hover:bg-gray-200 p-3 sm:p-4 md:w-3xs max-h-[260px]"
       >
         <div className="overflow-y-auto">
           <p className="text-base font-medium text-[#262626">
