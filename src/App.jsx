@@ -38,6 +38,26 @@ function App() {
   }, [selectedNote]);
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setSelectedNote(false);
+      }
+    };
+
+    if (selectedNote) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [selectedNote]);
+
+  useEffect(() => {
     const q = query(collection(db, selectedUser));
 
     const unSubScribe = onSnapshot(q, (querySnapshot) => {
@@ -93,7 +113,13 @@ function App() {
     }
   };
 
-  const updateNote = async () => {
+  const updateNote = async (item) => {
+    if (
+      item.content === selectedNote.content &&
+      item.title === selectedNote.title
+    ) {
+      return;
+    }
     const payload = {
       title: selectedNote.title,
       content: selectedNote.content,
@@ -181,13 +207,18 @@ function App() {
                 id: null,
               })
             }
-            className="mb-4 px-4 py-2 bg-white text-[#262626] rounded-md hover:bg-gray-200 w-full sm:w-auto cursor-pointer"
+            className={`mb-4 px-4 py-2 ${
+              selectedUser === "Notes2"
+                ? "bg-yellow-400 hover:bg-yellow-300"
+                : " bg-white hover:bg-gray-200"
+            } text-[#262626] rounded-md  w-full sm:w-auto cursor-pointer`}
           >
             + New Note
           </button>
           <div className="grid pb-6 grid-cols-2 gap-3 sm:gap-4 md:flex md:flex-wrap md:grid-cols-none">
             {sortedNotes(items).map((item) => (
               <Notes
+                selectedUser={selectedUser}
                 key={item.id}
                 item={item}
                 onClick={() => setSelectedNote(item)}
@@ -288,7 +319,7 @@ function App() {
                                   ),
                                 }))
                               }
-                              className="w-full rounded-md bg-white px-3 py-2 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600"
+                              className="w-full no-scrollbar rounded-md bg-white px-3 py-2 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600"
                             />
                           </div>
                         </div>
@@ -297,7 +328,14 @@ function App() {
                   </div>
                   <div className="bg-white px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                     <button
-                      onClick={selectedNote.id ? updateNote : createNote}
+                      onClick={
+                        selectedNote.id
+                          ? () =>
+                              updateNote(
+                                items.find((i) => i.id === selectedNote.id)
+                              )
+                          : createNote
+                      }
                       type="button"
                       className="inline-flex transition delay-150 duration-300 ease-in-out hover:cursor-pointer w-full justify-center rounded-md border border-gray-300 bg-[#F8EEE2] px-3 py-2 text-sm font-semibold text-[#262626] shadow-xs hover:bg-[#ede2d5] sm:ml-3 sm:w-auto"
                     >
