@@ -185,7 +185,11 @@ function App() {
 
   return (
     <>
-      <main className="@container min-h-screen bg-[#F8EEE2]">
+      <main
+        className={`@container min-h-screen ${
+          selectedUser === "Notes2" ? "bg-[#FFF0E0]" : "bg-[#F8EEE2]"
+        } `}
+      >
         {toast.show && (
           <Toast title={toast.title} description={toast.description} />
         )}
@@ -209,7 +213,7 @@ function App() {
             }
             className={`mb-4 px-4 py-2 ${
               selectedUser === "Notes2"
-                ? "bg-yellow-400 hover:bg-yellow-300"
+                ? "bg-[#FFF8B5] hover:bg-[#FFE875]"
                 : " bg-white hover:bg-gray-200"
             } text-[#262626] rounded-md  w-full sm:w-auto cursor-pointer`}
           >

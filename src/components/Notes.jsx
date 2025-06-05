@@ -1,4 +1,4 @@
-import '../index.css'
+import "../index.css";
 import { Fragment } from "react";
 const Notes = ({ item, onClick, selectedUser }) => {
   const addNewLineToText = (text) => {
@@ -38,8 +38,8 @@ const Notes = ({ item, onClick, selectedUser }) => {
         key={item.id}
         className={`flex gap-x-4 rounded-xl ${
           selectedUser === "Notes2"
-            ? "bg-yellow-400 hover:bg-yellow-300"
-            : " bg-white hover:bg-gray-200"
+            ? "bg-[#FFF8B5] hover:bg-[#FFE875]"
+            : " bg-[white] hover:bg-gray-200"
         } transition delay-150 duration-200 ease-in-out hover:cursor-pointer  p-3 sm:p-4 md:w-3xs max-h-[260px]`}
       >
         <div className="overflow-y-auto no-scrollbar">
