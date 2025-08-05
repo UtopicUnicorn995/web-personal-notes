@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import Notes from "./components/Notes";
 import Toast from "./components/Toast";
+import PreviewModal from "./components/PreviewModal";
 
 const modalRoot = document.getElementById("modal-root");
 
@@ -23,6 +24,8 @@ function App() {
   const [selectedUser, setSelectedUser] = useState("Notes");
   const [showModal, setShowModal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewNote, setPreviewNote] = useState(null);
   const [toast, setToast] = useState({
     show: false,
     title: "",
@@ -226,6 +229,10 @@ function App() {
                 key={item.id}
                 item={item}
                 onClick={() => setSelectedNote(item)}
+                onClickPreview={() => {
+                  setPreviewNote(item);
+                  setShowPreviewModal(true);
+                }}
               />
             ))}
           </div>
@@ -330,29 +337,44 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-white px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                    <button
-                      onClick={
-                        selectedNote.id
-                          ? () =>
-                              updateNote(
-                                items.find((i) => i.id === selectedNote.id)
-                              )
-                          : createNote
-                      }
-                      type="button"
-                      className="inline-flex transition delay-150 duration-300 ease-in-out hover:cursor-pointer w-full justify-center rounded-md border border-gray-300 bg-[#F8EEE2] px-3 py-2 text-sm font-semibold text-[#262626] shadow-xs hover:bg-[#ede2d5] sm:ml-3 sm:w-auto"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setSelectedNote(null)}
-                      type="button"
-                      className="mt-3 hover:cursor-pointer inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                    >
-                      Cancel
-                    </button>
+                  <div className="flex flex-col sm:flex-row justify-between align-middle px-4 py-3">
+                    <div className="sm:px-6 items-center justify-center">
+                      <button
+                        onClick={() => {
+                          setPreviewNote(selectedNote);
+                          setShowPreviewModal(true);
+                        }}
+                        type="button"
+                        className="mt-3 hover:cursor-pointer inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                      >
+                        Preview
+                      </button>
+                    </div>
+                    <div className="bg-white  sm:flex sm:flex-row-reverse sm:px-6">
+                      <button
+                        onClick={
+                          selectedNote.id
+                            ? () =>
+                                updateNote(
+                                  items.find((i) => i.id === selectedNote.id)
+                                )
+                            : createNote
+                        }
+                        type="button"
+                        className="inline-flex mt-3 sm:mt-0 transition delay-150 duration-300 ease-in-out hover:cursor-pointer w-full justify-center rounded-md border border-gray-300 bg-[#F8EEE2] px-3 py-2 text-sm font-semibold text-[#262626] shadow-xs hover:bg-[#ede2d5] sm:ml-3 sm:w-auto"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setSelectedNote(null)}
+                        type="button"
+                        className="mt-3 hover:cursor-pointer inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
+
                   {confirmDelete && (
                     <div
                       onClick={() => setConfirmDelete(false)}
@@ -399,6 +421,16 @@ function App() {
           </div>,
           modalRoot
         )}
+
+      {showPreviewModal && previewNote && (
+        <PreviewModal
+          note={previewNote}
+          onClose={() => {
+            setShowPreviewModal(false);
+            setPreviewNote(null);
+          }}
+        />
+      )}
     </>
   );
 }
