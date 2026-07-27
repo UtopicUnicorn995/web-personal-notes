@@ -5,6 +5,16 @@ const modalRoot = document.getElementById("modal-root");
 function PreviewModal({ note, onClose }) {
   if (!note) return null;
 
+  const formatDate = (timestamp) =>
+    new Date(timestamp.seconds * 1000).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+  const formattedCreatedAt = formatDate(note.createdAt);
+  const formattedUpdatedAt = formatDate(note.updatedAt);
+
   return createPortal(
     <div
       className="fixed inset-0 z-10 flex items-center justify-center bg-gray-500/75"
@@ -44,6 +54,16 @@ function PreviewModal({ note, onClose }) {
             </svg>
           </button>
         </div>
+        <div className="p-6 overflow-y-auto">
+          <div className="prose prose-sm sm:prose max-w-none">
+            <p className="whitespace-pre-wrap text-gray-800">
+              Created date: {formattedCreatedAt || "No content"}
+            </p>
+            <p className="whitespace-pre-wrap text-gray-800">
+              Updated date: {formattedUpdatedAt || "No content"}
+            </p>
+          </div>
+        </div>
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="prose prose-sm sm:prose max-w-none">
             <p className="whitespace-pre-wrap text-gray-800">
@@ -53,7 +73,7 @@ function PreviewModal({ note, onClose }) {
         </div>
       </div>
     </div>,
-    modalRoot
+    modalRoot,
   );
 }
 
